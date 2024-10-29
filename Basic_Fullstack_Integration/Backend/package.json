@@ -1,0 +1,15 @@
+{
+  "name": "basic_fullstack_integration",
+  "version": "1.0.0",
+  "description": "Basic Full stack Application where we'll integrate frontend and backend.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Sumit Singh",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
