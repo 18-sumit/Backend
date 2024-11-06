@@ -2,7 +2,7 @@
 
 // 1st Approch Using Promises
 const asyncHandler = (requestHandler) => {
-    (req , res , next ) => {
+    return (req , res , next ) => { // higherOrder function ek function return karta h lekin yaha hum func ko return hee nahi kr rahe the hence it was an error , fixed later on
         Promise
         .resolve(requestHandler(req , res , next))
         .catch( (error) => next(error) )
