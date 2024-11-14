@@ -53,7 +53,7 @@ const UserSchema = new Schema(
 
 
 // mongoose hooks - pre is like just before saving data encrypt it .
-// it is middleware in mongoose
+// it is a middleware in mongoose
 
 UserSchema.pre("save", async function (next) {
 
@@ -64,8 +64,8 @@ UserSchema.pre("save", async function (next) {
 
     // else run this
 
-    this.password = bcrypt.hash(this.password, 10)
-    next()
+    this.password = await bcrypt.hash(this.password, 10)
+    next() 
 })
 
 // to check weather the entered password is correct or not 
