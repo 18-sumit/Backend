@@ -16,9 +16,13 @@ const registerUser = asyncHandler(async (req, res) => {
     // check for user creation
     // return response else send error
 
-    // 1st step: get details 
+
+    // console.log(req.files)
+
 
     const { fullname, email, username, password } = req.body
+    // console.log(req.body);
+    
     // console.log("email : ", email)
 
     // validation of field is empty
@@ -37,15 +41,18 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     // file handling on our server 
-    const avatarLocalPath = req.files?.avatar && Array.isArray(req.files.avatar) && req.files.avatar.length > 0
-        ? req.files.avatar[0].path
-        : null;  // Or provide a default value if needed (like `null` or `defaultPath`)
+    const avatarLocalPath = req.files?.avatar[0]?.path;
+    // console.log("This is from console ",req.files)
 
-    const coverImageLocalPath = req.files?.coverImage && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0
-        ? req.files.coverImage[0].path
-        : null;  // Or provide a default value if needed (like `null` or `defaultPath`)
+    // Or provide a default value if needed (like `null` or `defaultPath`)
 
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }  
+    // Or provide a default value if needed (like `null` or `defaultPath`)
 
+    // console.log(avatarLocalPath);
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required");
     }
@@ -54,7 +61,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!avatar) {
-        throw new ApiError(400, "Avatar file is required")
+        throw new ApiError(400, "Faild to upload on cloudinary");
     }
 
     // to connect everything on db :
