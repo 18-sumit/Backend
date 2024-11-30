@@ -76,6 +76,7 @@ UserSchema.methods.isPasswordCorrect = async function (password) {  // not arrow
 
 }
 
+// short-lived tokens 
 UserSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         {
@@ -91,6 +92,7 @@ UserSchema.methods.generateAccessToken = function () {
     )
 }
 
+// long-lived tokens , used to obtain new access tokens when the old ones expire.
 UserSchema.methods.generateRefreshToken = async function () {
     jwt.sign(
         {
