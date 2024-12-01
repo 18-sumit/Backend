@@ -16,6 +16,7 @@ app.use(express.static("public")) // as we have public folder .
 
 // to access & set cookies of user's brower from my server || basically to perform CRUD operations on cookies
 app.use(cookieParser()) // have options but not needed as of now
+// after using it : options are for security purpose in cookies , from cookieParser
 
 
 
