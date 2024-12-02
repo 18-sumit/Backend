@@ -305,11 +305,11 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
     return res
         .status(200)
-        .json(
+        .json(new ApiResponse(
             200,
             req.user,
             "current user fetched successfully"
-        )
+        ))
 });
 
 // method for accont update:
@@ -322,7 +322,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     }
 
     // finding the user 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id, // finding the user from req.user , refer authMiddleware
         {
             $set: {
@@ -330,8 +330,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
                 // fullname : fullname
                 fullname,
                 email,
-
-
             }
         },
         { new: true } // if new = true , after update new information will be returned
@@ -346,6 +344,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
 
+    // TODO : delete old image - assignment
     const avatarLocalPath = req.field?.path
 
     if (!avatarLocalPath) {
