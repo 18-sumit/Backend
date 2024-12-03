@@ -4,6 +4,7 @@ import { User } from "../models/user.models.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
 
 // method to generate :
@@ -457,28 +458,92 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 }
             }
         },
-        {   
-    // project : gives the projection , it will not project all the values but only selected values by making flag value = 1
+        {
+            // project : gives the projection , it will not project all the values but only selected values by making flag value = 1
             $project: {
                 fullname: 1,
                 username: 1,
                 email: 1,
-                subscribersCount : 1,
-                channelsSubscribedToCount : 1,
-                isSubscribed : 1,
-                avatar : 1,
-                coverImage : 1,
+                subscribersCount: 1,
+                channelsSubscribedToCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
             }
         }
     ])
 
-    if(!channel?.length){
-        throw new ApiError(400 , "Channel Does not exist")
+    if (!channel?.length) {
+        throw new ApiError(400, "Channel Does not exist")
     }
 
     return res
-    .status(200)
-    .json(new ApiResponse(200 , channel[0] , "user channel fetched successfully"))
+        .status(200)
+        .json(new ApiResponse(200, channel[0], "user channel fetched successfully"))
+});
+
+
+//method to get watchHistory:
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+
+
+    // Important concept :
+    // _id is not a id it is a string in mongoDb , mongoose converts it to a proper id.
+    // _id  !== req.user._id  in aggregation , because data of aggregation is sent directly ,
+    // without converting it , otherwise mongoose converts everything 
+
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            },
+        },
+        {
+            $lookup: {
+                from: "videos", // as it is Video in model schema but , plural and all small in mongodb
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    // these will be available to owner only
+                                    $project: {
+                                        fullname: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner" // as it is a field , hence $
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+    ]);
+
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200, user[0].watchHistory, "Watch history fetched successfully"
+            )
+        )
 })
 
 export {
@@ -491,5 +556,6 @@ export {
     updateAccountDetails,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 }
