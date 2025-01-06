@@ -1,5 +1,8 @@
 # Video Hosting Platform - Backend
 
+[Model link](https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj?origin=share)
+
+
 ## Overview
 
 This project is a robust and scalable backend for a video hosting platform, designed to function similarly to YouTube. It is built using Node.js, Express.js, MongoDB, Mongoose, JWT (JSON Web Tokens), bcrypt, and other modern technologies. The backend provides all the core functionalities necessary for a video hosting service, including user authentication, video upload and management, user interactions (likes, dislikes, comments, subscriptions), and much more.
