@@ -1,5 +1,5 @@
-//require("dotenv").config({ path : '/.env'}) common js
-import dotenv from "dotenv" // modular js
+//require("dotenv").config({ path : '/.env'}) : Syntax of common js
+import dotenv from "dotenv" //: Syntax of : modular js
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
 
