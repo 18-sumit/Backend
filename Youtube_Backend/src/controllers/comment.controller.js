@@ -29,6 +29,65 @@ const addComment = asyncHandler(async (req, res) => {
 
 const updateComment = asyncHandler(async (req, res) => {
     // TODO: update a comment
+    try {
+        const { commentId } = req.params;
+        const { content } = req.body;
+
+        if (!content) {
+            throw new ApiError(
+                400,
+                "Content is reqired to update comment"
+            )
+        }
+
+        const comment = await Comment.findById(commentId);
+
+        if (!comment) {
+            throw new ApiError(
+                404,
+                "Comment not found"
+            )
+        }
+
+        if (comment?.owner.toString() !== req.user?._id.toString()) {
+            throw new ApiError(
+                400,
+                "Only owner can update there comment"
+            )
+        }
+
+        const updatedComment = await Comment.findByIdAndUpdate(
+            commentId,
+            {
+                $set: {
+                    content
+                }
+            },
+            {
+                new: true // if it is true then it returns the updated comment , else old comment
+            }
+        );
+
+        if (!updatedComment) {
+            throw new ApiError(
+                500,
+                "Failed to update comment , please try again"
+            )
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    updatedComment,
+                    "Comment updated successfully"
+                )
+            )
+
+    } catch (error) {
+        throw new ApiError(`Failed to update comment , please check ${error.message}`)
+    }
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
