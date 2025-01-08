@@ -1,5 +1,6 @@
 import mongoose, { isValidObjectId } from "mongoose"
 import { Comment } from "../models/comment.model.js"
+import { Video } from "../models/video.models.js"
 import { Like } from "../models/Like.model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -25,7 +26,59 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
 const addComment = asyncHandler(async (req, res) => {
     // TODO: add a comment to a video
-})
+    try {
+
+        const { videoId } = req.params;
+        const { content } = req.body;
+
+        if (!content) {
+            throw new ApiError(
+                400,
+                "Comment is required"
+            )
+        }
+
+        const video = await Video.findById(videoId);
+
+        if (!video) {
+            throw new ApiError(
+                404,
+                "Video not found"
+            )
+        }
+
+        const comment = await Comment.create(
+            {
+                content,
+                video: videoId,
+                owner: req.user._id
+            }
+        )
+
+        if (!comment) {
+            throw new ApiError(
+                500,
+                "Failed to add a comment , Please try again"
+            );
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    comment,
+                    "Comment added successfully"
+                )
+            );
+
+    } catch (error) {
+        throw new ApiError(
+            400,
+            `Failed to add comment , please check ${error.message}`
+        )
+    }
+});
 
 const updateComment = asyncHandler(async (req, res) => {
     // TODO: update a comment
@@ -86,7 +139,7 @@ const updateComment = asyncHandler(async (req, res) => {
             )
 
     } catch (error) {
-        throw new ApiError(`Failed to update comment , please check ${error.message}`)
+        throw new ApiError(400, `Failed to update comment , please check ${error.message}`)
     }
 })
 
