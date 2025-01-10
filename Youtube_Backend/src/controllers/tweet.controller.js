@@ -10,7 +10,7 @@ const createTweet = asyncHandler(async (req, res) => {
     try {
         const { content } = req.body;
 
-        if (!content) {
+        if (!content || content.trim() === "") {
             throw new ApiError(
                 400,
                 "Content is required"
@@ -47,6 +47,52 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
     // TODO: get user tweets
+    try {
+        const { userId } = req.params;
+        const { page = 1, limit = 10 } = req.query; // Extracting 'page' and 'limit' for pagination, default to 1 and 10
+        const skip = (page - 1) * limit; // Calculating number of tweets to skip based on the current page
+
+        if (!isValidObjectId(userId)) {
+            throw new ApiError(
+                400,
+                "Invalid userId"
+            )
+        }
+
+        // Fetching tweets using find method with Pagination (skip & limit)
+        const userAlltweets = await Tweet
+            .find({ owner: userId }) //Find all tweets where the owner matches 'userId'
+            .skip(skip) // skip the record of current page
+            .limit(limit) // Limit the number of records returned based on 'limit'
+            .select('content createdAt'); // Select only the fields 'content' and 'createdAt'
+
+        if(userAlltweets.length === 0){
+            throw new ApiError(
+                404,
+                "No tweets found for this user"
+            );
+        }
+
+        // counting how many tweets this user has
+        const totalTweets = await Tweet.countDocument({owner : userId});
+
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                userAlltweets,
+                `Tweets fetched successfully, ${ totalTweets }`
+            )
+        );
+
+    } catch (error) {
+        throw new ApiError(
+            500,
+            `Error fetching tweets: ${error.message}`
+        )
+    }
+
 })
 
 const updateTweet = asyncHandler(async (req, res) => {
@@ -55,7 +101,7 @@ const updateTweet = asyncHandler(async (req, res) => {
         const { tweetId } = req.params;
         const { content } = req.body;
 
-        if (!content) {
+        if (!content || content.trim() === "") {
             throw new ApiError(
                 400,
                 "Content is required to update tweet"
