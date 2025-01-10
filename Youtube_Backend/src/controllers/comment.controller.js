@@ -31,7 +31,7 @@ const addComment = asyncHandler(async (req, res) => {
         const { videoId } = req.params;
         const { content } = req.body;
 
-        if (!content) {
+        if (!content || content.trim() === "") {
             throw new ApiError(
                 400,
                 "Comment is required"
@@ -86,7 +86,7 @@ const updateComment = asyncHandler(async (req, res) => {
         const { commentId } = req.params;
         const { content } = req.body;
 
-        if (!content) {
+        if (!content || content.trim() === "") {
             throw new ApiError(
                 400,
                 "Content is reqired to update comment"
