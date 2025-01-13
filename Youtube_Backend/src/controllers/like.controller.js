@@ -68,15 +68,71 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
             )
 
     } catch (error) {
-        throw new ApiError(`Please check ${error.message}`);
+        throw new ApiError(500, `An error occurred: ${error.message}`);
     }
 })
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
     const { commentId } = req.params
     //TODO: toggle like on comment
+    try {
 
-})
+        if (!isValidObjectId(commentId)) {
+            throw new ApiError(
+                400,
+                "Invalid commentId"
+            );
+        }
+
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            throw new ApiError(
+                404,
+                "No comment found"
+            )
+        }
+
+        if (!req.user || !req.user._id) {
+            throw new ApiError(
+                401,
+                "Unauthorized user"
+            );
+        }
+
+        const likedAlready = await Like.findOne({
+            comment: commentId,
+            likedBy: req.user._id,
+        })
+
+        if (likedAlready) {
+            await Like.findByIdAndDelete(likedAlready._id)
+            return res
+                .status(200)
+                .json(
+                    200,
+                    { isLiked: false }
+                );
+        }
+
+        await Like.create({
+            comment: commentId,
+            likedBy: req.user._id
+        })
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    { isLiked: true }
+                )
+            );
+
+    } catch (error) {
+        throw new ApiError(500, `An error occurred: ${error.message}`);
+    }
+
+});
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
     const { tweetId } = req.params
