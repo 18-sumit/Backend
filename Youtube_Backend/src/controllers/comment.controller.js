@@ -17,6 +17,36 @@ const getVideoComments = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Video does not exist");
         }
 
+        if(!videoId){
+            throw new ApiError(
+                404,
+                "Video not found"
+            )
+        }
+
+        const commentsAggregate = Comment.aggregate([
+            {
+                $match:{
+                    video : new mongoose.Types.ObjectId(videoId)
+                }
+            },
+            {
+                $lookup:{
+                    from:"users",
+                    localField:"owner",
+                    foreignField:"_id",
+                    as:"owner"
+                }
+            },
+            {
+                $lookup:{
+                    from :"likes",
+                    localField:"_id",
+                    foreignField:"comment",
+                    as:"likes"
+                }
+            },
+        ])
 
     } catch (error) {
 
