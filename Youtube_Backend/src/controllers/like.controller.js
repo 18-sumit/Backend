@@ -1,5 +1,6 @@
 import mongoose, { isValidObjectId } from "mongoose"
-import { Like } from "../models/like.model.js"
+import { Like } from "../models/like.models.js"
+import { Tweet } from "../models/tweet.models.js"
 import { Video } from "../models/video.models.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -137,6 +138,67 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 const toggleTweetLike = asyncHandler(async (req, res) => {
     const { tweetId } = req.params
     //TODO: toggle like on tweet
+
+    try {
+
+        if (!isValidObjectId(tweetId)) {
+            throw new ApiError(
+                400,
+                "Invalid tweetId"
+            );
+        }
+
+        const tweet = await Tweet.findById(tweetId);
+        if (!tweet) {
+            throw new ApiError(
+                404,
+                "Tweet not found"
+            );
+        }
+
+        if (!req.user || !req.user._id) {
+            throw new ApiError(
+                401,
+                "User not authenticated"
+            );
+        }
+
+        const likedAlready = await Tweet.findOne({
+            tweet: tweetId,
+            likedBy: req.user._id
+        })
+
+        if (likedAlready) {
+            await Like.findByIdAndDelete(likedAlready._id);
+
+            return res
+                .status(200)
+                .json(
+                    new ApiResponse(
+                        200,
+                        { isLiked: false }
+                    )
+                )
+        }
+
+        await Like.create({
+            tweet: tweetId,
+            likedAlready: req.user._id
+        })
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    { isLiked: true }
+                )
+            )
+
+
+    } catch (error) {
+        throw new ApiError(500, `An error occurred: ${error.message}`);
+    }
 }
 )
 
