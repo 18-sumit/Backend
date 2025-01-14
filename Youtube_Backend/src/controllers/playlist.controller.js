@@ -49,6 +49,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
 const getUserPlaylists = asyncHandler(async (req, res) => {
     const { userId } = req.params
     //TODO: get user playlists
+
 })
 
 const getPlaylistById = asyncHandler(async (req, res) => {
@@ -69,6 +70,11 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 const deletePlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params
     // TODO: delete playlist
+    try {
+        
+    } catch (error) {
+        
+    }
 })
 
 const updatePlaylist = asyncHandler(async (req, res) => {
