@@ -79,8 +79,35 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     // TODO: delete playlist
     try {
 
-    } catch (error) {
+        const playlist = await Playlist.findById(playlistId);
 
+        if (!playlist) {
+            throw new ApiError(
+                400,
+                "Playlist not found"
+            );
+        }
+
+        if (playlist.owner.toString() !== req.user._id) {
+            throw new ApiError(
+                400,
+                "Only owner can delete their playlist"
+            )
+        }
+
+        await Playlist.findByIdAndDelete(playlistId);
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    playlistId,
+                    "Playlist deleted successfully"
+                )
+            )
+    } catch (error) {
+        throw new ApiError(500, `An error occurred: ${error.message}`);
     }
 })
 
@@ -139,26 +166,26 @@ const updatePlaylist = asyncHandler(async (req, res) => {
                 }
             },
             {
-                new : true
+                new: true
             }
         )
 
-        if(!updatedPlaylist){
+        if (!updatedPlaylist) {
             throw new ApiError(
                 500,
                 "Failed to update playlist"
             )
         }
 
-        return res 
-        .status(200)
-        .json(
-            new ApiResponse(
-                200,
-                updatedPlaylist,
-                "Playlist updated successfully"
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    updatedPlaylist,
+                    "Playlist updated successfully"
+                )
             )
-        )
 
     } catch (error) {
         throw new ApiError(500, `An error occurred: ${error.message}`);
