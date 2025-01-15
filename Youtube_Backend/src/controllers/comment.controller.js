@@ -169,7 +169,7 @@ const updateComment = asyncHandler(async (req, res) => {
             )
 
     } catch (error) {
-        throw new ApiError(400, `Failed to update comment , please check ${error.message}`)
+        throw new ApiError(500, `An error occurred: ${error.message}`);
     }
 })
 
