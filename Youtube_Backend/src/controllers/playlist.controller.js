@@ -1,5 +1,6 @@
 import mongoose, { isValidObjectId, set } from "mongoose"
-import { Playlist } from "../models/playlist.model.js"
+import { Video } from "../models/video.models.js"
+import { Playlist } from "../models/playlist.models.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
@@ -66,6 +67,73 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const { playlistId, videoId } = req.params
+
+
+    try {
+
+        if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
+            throw new ApiError(
+                400,
+                "Invalid PlaylistId or VideoId"
+            );
+        }
+
+        const playlist = await Playlist.findById(playlistId);
+        const video = await Video.findById(videoId);
+
+        if (!playlist) {
+            throw new ApiError(
+                404,
+                "Playlist not found"
+            )
+        }
+
+        if (!video) {
+            throw new ApiError(
+                404,
+                "Video not found"
+            );
+        }
+
+        if (playlist.owner.toString() && video.owner.toString() !== req.user._id.toString()) {
+            throw new ApiError(
+                400,
+                "only owner can add video to their playlist"
+            )
+        }
+
+        const updatedPlaylist = await Playlist.findByIdAndUpdate(
+            playlistId,
+            {
+                $addToSet: {
+                    videos: videoId
+                }
+            },
+            {
+                new: true
+            }
+        );
+
+        if (!updatedPlaylist) {
+            throw new ApiError(
+                400,
+                "Failed to add video to playlist , try again"
+            );
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    updatedPlaylist,
+                    "Video added to playlist successfully"
+                )
+            );
+
+    } catch (error) {
+        throw new ApiError(500, `An error occurred: ${error.message}`);
+    }
 })
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
