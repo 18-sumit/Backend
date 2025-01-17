@@ -75,6 +75,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
             throw new ApiError(
                 400,
                 "Invalid PlaylistId or VideoId"
+                
             );
         }
 
