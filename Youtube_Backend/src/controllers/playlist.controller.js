@@ -75,7 +75,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
             throw new ApiError(
                 400,
                 "Invalid PlaylistId or VideoId"
-                
+
             );
         }
 
@@ -140,6 +140,66 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const { playlistId, videoId } = req.params
     // TODO: remove video from playlist
+    try {
+
+        if (!isValidObjectId(playlistId) || !isValidObjectId(videoId)) {
+            throw new ApiError(
+                400,
+                "Invalid playlistId or videoId"
+            )
+        }
+
+        const playlist = await Playlist.findById(playlistId);
+        const video = await Video.findById(videoId);
+
+        if (!playlist) {
+            throw new ApiError(
+                404,
+                "Playlist not found"
+            )
+        }
+
+        if (!video) {
+            throw new ApiError(
+                404,
+                "Video not found"
+            )
+        }
+
+        if (
+            (playlist.owner?._id.toString() && video.owner?.toString()) !==
+            req.user?._id.toString()
+        ) {
+            throw new ApiError(
+                404,
+                "only owner can remove video from their playlist"
+            );
+        }
+
+        const updatedPlaylist = await Playlist.findByIdAndUpdate(
+            playlistId,
+            {
+                $pull: {
+                    videos: videoId
+                },
+            },
+            {
+                new: true
+            }
+        )
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    updatedPlaylist,
+                    "Removed video from playlist successfully"
+                )
+            )
+    } catch (error) {
+        throw new ApiError(500, `An error occurred: ${error.message}`);
+    }
 
 })
 
