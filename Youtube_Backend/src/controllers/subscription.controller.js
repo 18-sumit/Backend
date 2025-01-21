@@ -61,6 +61,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
                     "subscribed successfully"
                 )
             );
+            
     } catch (error) {
         throw new ApiError(500, `An error occurred: ${error.message}`);
 
