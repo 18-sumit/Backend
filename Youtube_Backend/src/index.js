@@ -4,7 +4,7 @@ import connectDB from "./db/index.js";
 import { app } from "./app.js";
 
 
-// in modular js we have to config detenv file separately
+// in modular js we have to config dotenv file separately
 dotenv.config({
     path: "./env"
 })
